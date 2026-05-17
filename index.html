@@ -286,7 +286,8 @@
     </div>
 
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxBufjWkJ5xGyof8flKH_o8ABR3zuygSnbdoCGSmpltW8duOPB4oNvWFOGZwEidTonl/exec';
+        // --- URL BARU YANG TELAH DIMASUKKAN SEPERTI ARAHAN ---
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxwV2_5VNU8-bMp2if7N4iNX4mL5XR7D5okLHlu2fQIJbv43zFEMzCrymnMZay4nDGO/exec';
         
         let state = {
             classes: {},      
@@ -661,7 +662,6 @@
             setTimeout(() => {
                 content.classList.remove('translate-y-full');
             }, 10);
-            
             renderCharts('harian');
         }
 
@@ -770,4 +770,258 @@
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    return context.raw
+                                    return context.raw + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function openModal(className) {
+            state.currentClassModal = className;
+            document.getElementById('modal-class-name').innerText = className;
+            
+            const dObj = new Date(state.selectedDate);
+            document.getElementById('modal-date-display').innerText = `${dObj.getDate()} ${monthNames[dObj.getMonth()]} ${dObj.getFullYear()}`;
+
+            const targetDateStr = dObj.toDateString();
+            const existingRecord = state.attendance.find(r => 
+                r.kelas === className && new Date(r.tarikh).toDateString() === targetDateStr
+            );
+            
+            const absentList = existingRecord && existingRecord.namaTakHadir ? existingRecord.namaTakHadir : [];
+            const container = document.getElementById('absent-list-container');
+            
+            container.innerHTML = '';
+            
+            if (absentList.length === 0) {
+                document.getElementById('hadir-semua-banner').style.display = 'block';
+            } else {
+                document.getElementById('hadir-semua-banner').style.display = 'none';
+                absentList.forEach(name => {
+                    if (name.trim() !== '') addAbsentRow(name);
+                });
+            }
+
+            const modal = document.getElementById('attendance-modal');
+            const content = document.getElementById('attendance-modal-content');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('translate-y-full');
+            }, 10);
+        }
+
+        function addAbsentRow(selectedName = '') {
+            const container = document.getElementById('absent-list-container');
+            document.getElementById('hadir-semua-banner').style.display = 'none';
+
+            const row = document.createElement('div');
+            row.className = 'flex items-center gap-2 absent-row animate-fade-in';
+            
+            row.innerHTML = `
+                <select onchange="updateDropdownOptions()" class="absent-select flex-1 p-3.5 border border-gray-200 rounded-2xl bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-semibold text-gray-700">
+                    <option value="">-- PILIH NAMA MURID --</option>
+                </select>
+                <button onclick="removeAbsentRow(this)" class="w-12 h-12 flex-shrink-0 bg-red-50 text-red-500 rounded-2xl border border-red-100 flex items-center justify-center hover:bg-red-100 transition shadow-sm">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            container.appendChild(row);
+
+            if (selectedName) {
+                const select = row.querySelector('.absent-select');
+                const opt = document.createElement('option');
+                opt.value = selectedName;
+                opt.text = selectedName;
+                select.appendChild(opt);
+                select.value = selectedName;
+            }
+            updateDropdownOptions();
+        }
+
+        function updateDropdownOptions() {
+            const selects = document.querySelectorAll('.absent-select');
+            const allStudents = state.classes[state.currentClassModal] || [];
+            const selectedValues = Array.from(selects).map(s => s.value).filter(v => v !== '');
+
+            selects.forEach(select => {
+                const currentValue = select.value;
+                select.innerHTML = '<option value="">-- PILIH NAMA MURID --</option>';
+                
+                allStudents.forEach(student => {
+                    if (!selectedValues.includes(student) || student === currentValue) {
+                        const option = document.createElement('option');
+                        option.value = student;
+                        option.text = student;
+                        if (student === currentValue) {
+                            option.selected = true;
+                        }
+                        select.appendChild(option);
+                    }
+                });
+            });
+        }
+
+        function removeAbsentRow(btnElement) {
+            const row = btnElement.parentElement;
+            row.remove();
+            
+            const container = document.getElementById('absent-list-container');
+            if (container.children.length === 0) {
+                document.getElementById('hadir-semua-banner').style.display = 'block';
+            }
+            updateDropdownOptions();
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('attendance-modal');
+            const content = document.getElementById('attendance-modal-content');
+            content.classList.add('translate-y-full');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        async function submitAttendance() {
+            const className = state.currentClassModal;
+            
+            let namaTakHadir = [];
+            const selects = document.querySelectorAll('.absent-select');
+            
+            selects.forEach(select => {
+                const val = select.value;
+                if (val && val !== '') {
+                    namaTakHadir.push(val);
+                }
+            });
+
+            namaTakHadir = [...new Set(namaTakHadir)];
+            const bilTakHadir = namaTakHadir.length;
+
+            const d = new Date(state.selectedDate);
+            const dateForApi = `${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}-${d.getFullYear()}`;
+
+            const payload = {
+                tarikh: dateForApi,
+                kelas: className,
+                bilTakHadir: bilTakHadir,
+                namaTakHadir: namaTakHadir
+            };
+
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> MENYIMPAN...';
+
+            if (!SCRIPT_URL) {
+                setTimeout(() => {
+                    const targetDateStr = d.toDateString();
+                    const existingIndex = state.attendance.findIndex(r => 
+                        r.kelas === className && new Date(r.tarikh).toDateString() === targetDateStr
+                    );
+                    
+                    const newRecord = { 
+                        tarikh: d.toISOString(), 
+                        kelas: className, 
+                        bilTakHadir: bilTakHadir, 
+                        namaTakHadir: namaTakHadir 
+                    };
+
+                    if(existingIndex >= 0) state.attendance[existingIndex] = newRecord;
+                    else state.attendance.push(newRecord);
+
+                    finishSubmission();
+                }, 1000);
+            } else {
+                try {
+                    const response = await fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({ action: 'simpanKehadiran', payload: payload })
+                    });
+                    const resData = await response.json();
+                    
+                    if(resData.status === 'success') {
+                        const resAtt = await fetch(`${SCRIPT_URL}?action=getAttendance`);
+                        const dataAtt = await resAtt.json();
+                        if(dataAtt.status === 'success') state.attendance = dataAtt.data;
+                        
+                        finishSubmission();
+                    } else {
+                        alert("Ralat semasa menyimpan. Sila cuba lagi.");
+                        resetBtn();
+                    }
+                } catch (error) {
+                    console.error("Error saving:", error);
+                    alert("Ralat sambungan. Gagal menyimpan.");
+                    resetBtn();
+                }
+            }
+        }
+
+        function finishSubmission() {
+            closeModal();
+            resetBtn();
+            processAnalytics();
+            renderDashboard();
+            renderClasses();
+            showSuccessPopup();
+        }
+
+        function removeAbsentRow(btnElement) {
+            const row = btnElement.parentElement;
+            row.remove();
+            const container = document.getElementById('absent-list-container');
+            if (container.children.length === 0) {
+                document.getElementById('hadir-semua-banner').style.display = 'block';
+            }
+            updateDropdownOptions();
+        }
+
+        function resetBtn() {
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = false;
+            btn.innerHTML = 'HANTAR LAPORAN';
+        }
+
+        function showLoading(show) {
+            const loader = document.getElementById('loading-screen');
+            if (show) {
+                loader.classList.remove('hidden');
+                setTimeout(() => loader.classList.remove('opacity-0'), 10);
+            } else {
+                loader.classList.add('opacity-0');
+                setTimeout(() => loader.classList.add('hidden'), 500);
+            }
+        }
+
+        function showSuccessPopup() {
+            const screen = document.getElementById('success-screen');
+            const logo = document.getElementById('success-logo');
+            
+            logo.classList.remove('animate-zoom-3x');
+            void logo.offsetWidth; 
+            
+            screen.classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('success-card').classList.remove('scale-95');
+                document.getElementById('success-card').classList.add('scale-100');
+                logo.classList.add('animate-zoom-3x'); 
+            }, 10);
+        }
+
+        function closeSuccess() {
+            const screen = document.getElementById('success-screen');
+            document.getElementById('success-card').classList.remove('scale-100');
+            document.getElementById('success-card').classList.add('scale-95');
+            screen.classList.add('opacity-0');
+            setTimeout(() => {
+                screen.classList.add('hidden');
+                screen.classList.remove('opacity-0');
+            }, 300);
+        }
+
+    </script>
+</body>
+</html>
