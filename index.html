@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Kehadiran - SK Tanjong Karang</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- TAMBAH CHART.JS UNTUK CARTA -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Animasi Berdenyut (Heartbeat) untuk Loading */
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            20% { transform: scale(1.15); }
+            40% { transform: scale(1); }
+            60% { transform: scale(1.15); }
+            80% { transform: scale(1); }
+            100% { transform: scale(1); }
+        }
+        .animate-heartbeat {
+            animation: heartbeat 1.5s infinite;
+        }
+
+        /* Animasi Zoom In Out 3 Kali untuk Success Pop-up */
+        @keyframes zoom3x {
+            0% { transform: scale(1); }
+            16% { transform: scale(1.3); }
+            33% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            66% { transform: scale(1); }
+            83% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+        .animate-zoom-3x {
+            animation: zoom3x 2.5s ease-in-out forwards;
+        }
+
+        .glass-card {
+            background: #ffffff;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+
+        /* Hide scrollbar for horizontal scrolling containers */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        /* Dropdown styling adjustments */
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1em;
+        }
+
+        /* Date picker custom overlap */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            background: transparent;
+            bottom: 0;
+            color: transparent;
+            cursor: pointer;
+            height: auto;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: auto;
+        }
+    </style>
+</head>
+<body class="text-gray-800 antialiased h-screen flex flex-col overflow-hidden">
+
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white bg-opacity-95 backdrop-blur-sm transition-opacity duration-500">
+        <img src="https://i.postimg.cc/8kZTp26j/SK-Tg-Karang.png" alt="Logo SK Tg Karang" class="w-40 h-40 object-contain mb-6 animate-heartbeat drop-shadow-xl">
+        <h2 class="text-xl md:text-2xl font-bold text-center text-blue-900 px-6 uppercase tracking-wider">
+            DATA KEHADIRAN SK TANJUNG KARANG SEDANG LOADING
+        </h2>
+        <div class="mt-8 flex space-x-2">
+            <div class="w-3 h-3 bg-blue-600 rounded-full animate-bounce" style="animation-delay: 0s;"></div>
+            <div class="w-3 h-3 bg-yellow-500 rounded-full animate-bounce" style="animation-delay: 0.2s;"></div>
+            <div class="w-3 h-3 bg-blue-600 rounded-full animate-bounce" style="animation-delay: 0.4s;"></div>
+        </div>
+    </div>
+
+    <!-- Success Screen -->
+    <div id="success-screen" class="fixed inset-0 z-50 hidden flex flex-col items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm transition-opacity duration-300">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full mx-4 p-8 flex flex-col items-center transform transition-transform scale-95" id="success-card">
+            <img src="https://i.postimg.cc/8kZTp26j/SK-Tg-Karang.png" id="success-logo" alt="Logo" class="w-32 h-32 object-contain mb-6 drop-shadow-md">
+            
+            <h2 class="text-xl md:text-2xl font-bold text-center text-blue-900 mb-2">
+                PENGESAHAN BERJAYA
+            </h2>
+            <p class="text-center text-gray-700 font-medium mb-8 uppercase leading-relaxed">
+                GPK HEM SK TG KARANG MENGUCAPKAN TERIMA KASIH ATAS KERJASAMA ANDA
+            </p>
+            
+            <button onclick="closeSuccess()" class="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl shadow-md transition-colors flex items-center justify-center gap-2">
+                <i class="fas fa-arrow-left"></i> TUTUP & KEMBALI
+            </button>
+        </div>
+    </div>
+
+    <div class="flex-1 overflow-y-auto w-full pb-20 relative">
+        <!-- Header Baru -->
+        <header class="bg-white text-center pt-8 pb-10 px-4 rounded-b-[2.5rem] shadow-[0_4px_20px_-5px_rgba(0,0,0,0.05)] relative z-10 border-b border-gray-100">
+            <div class="max-w-4xl mx-auto flex flex-col items-center justify-center gap-3">
+                <img src="https://i.postimg.cc/8kZTp26j/SK-Tg-Karang.png" alt="Logo" class="w-24 h-24 object-contain drop-shadow-sm">
+                <div>
+                    <h1 class="text-xl md:text-2xl font-extrabold tracking-tight text-blue-950 uppercase leading-snug">
+                        DASHBOARD KEHADIRAN HARIAN MURID
+                    </h1>
+                    <p class="text-blue-700 font-bold text-sm md:text-base mt-1">SEK KEB TG KARANG</p>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-4xl mx-auto px-4 mt-6 relative z-20">
+            
+            <!-- Overall School Analytics Card -->
+            <div class="glass-card rounded-2xl p-5 mb-6 flex flex-col md:flex-row gap-4 items-center justify-between border border-gray-200">
+                <div class="flex items-center gap-4 w-full md:w-auto">
+                    <!-- ICON CHART BOLEH KLIK -->
+                    <div onclick="openChartModal()" class="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-2xl border border-blue-100 cursor-pointer hover:bg-blue-100 hover:scale-105 transition-all shadow-sm group relative">
+                        <i class="fas fa-chart-pie group-hover:animate-pulse"></i>
+                        <span class="absolute -top-2 -right-2 flex h-4 w-4">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-4 w-4 bg-blue-500 border border-white"></span>
+                        </span>
+                    </div>
+                    <div>
+                        <h3 class="text-gray-500 text-[11px] font-bold uppercase tracking-wider">Keseluruhan Sekolah</h3>
+                        <p class="text-blue-600 font-bold text-lg mt-1" id="school-status-text">Memproses...</p>
+                    </div>
+                </div>
+                <div class="flex gap-3 w-full md:w-auto">
+                    <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-3 flex-1 text-center min-w-[100px]">
+                        <p class="text-indigo-400 text-[10px] font-bold uppercase">Harian (<span id="lbl-hari"></span>)</p>
+                        <p class="text-indigo-700 font-bold text-xl" id="school-daily-pct">- %</p>
+                    </div>
+                    <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-3 flex-1 text-center min-w-[100px]">
+                        <p class="text-emerald-500 text-[10px] font-bold uppercase">Bulanan (<span id="lbl-bulan"></span>)</p>
+                        <p class="text-emerald-700 font-bold text-xl" id="school-monthly-pct">- %</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Date Picker -->
+            <div class="bg-white rounded-2xl shadow-sm p-4 mb-6 border border-gray-200 relative overflow-hidden flex items-center gap-3 hover:bg-gray-50 transition-colors cursor-pointer group">
+                <input type="date" id="date-picker" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onchange="changeDate()">
+                <div class="w-12 h-12 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center border border-orange-100 pointer-events-none group-hover:bg-orange-100 transition-colors">
+                    <i class="fas fa-calendar-alt text-lg"></i>
+                </div>
+                <div class="pointer-events-none">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase block tracking-wider mb-0.5">Tarikh Pilihan</label>
+                    <span id="custom-date-display" class="block text-base font-extrabold text-gray-800">Memuatkan...</span>
+                </div>
+                <div class="ml-auto pr-2 pointer-events-none text-gray-300">
+                    <i class="fas fa-chevron-down text-sm"></i>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wide mb-3 px-1">Peratusan Mengikut Tahun</h3>
+                <div class="flex overflow-x-auto no-scrollbar gap-3 pb-2" id="years-container">
+                    <!-- Year cards generated here -->
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wide mb-3 px-1">Senarai Kelas</h3>
+                <div id="classes-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 pb-8">
+                    <!-- Class cards generated here -->
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Modal Form (Borang Kehadiran) -->
+    <div id="attendance-modal" class="fixed inset-0 z-40 hidden flex flex-col justify-end bg-gray-900 bg-opacity-40 backdrop-blur-sm transition-opacity duration-300">
+        <div class="bg-white rounded-t-[2rem] shadow-2xl h-[85vh] md:h-[70vh] w-full max-w-2xl mx-auto flex flex-col transform translate-y-full transition-transform duration-300" id="attendance-modal-content">
+            
+            <div class="px-6 pt-6 pb-4 flex justify-between items-start relative">
+                <button onclick="closeModal()" class="w-10 h-10 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200 transition absolute left-6">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <div class="w-full text-center mt-1">
+                    <h3 class="font-extrabold text-xl text-gray-900 uppercase tracking-tight" id="modal-class-name">KELAS</h3>
+                    <p class="text-xs text-gray-400 font-bold uppercase mt-1">UNIT HEM SK TANJONG KARANG</p>
+                </div>
+            </div>
+            
+            <div class="text-center pb-4 border-b border-gray-100">
+                <span class="inline-block bg-gray-100 text-gray-600 text-xs font-bold px-3 py-1 rounded-full" id="modal-date-display">Tarikh</span>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-6 bg-white">
+                <div class="bg-gray-50 rounded-3xl p-5 border border-gray-100">
+                    <p class="text-xs font-bold text-gray-500 uppercase text-center mb-5 tracking-widest">Senarai Murid Tidak Hadir:</p>
+                    
+                    <div id="hadir-semua-banner" class="bg-[#ecfdf5] border border-[#a7f3d0] rounded-2xl p-5 text-center mb-4 transition-all duration-300">
+                        <div class="text-[#059669] font-bold flex items-center justify-center gap-2 text-lg mb-1">
+                            <i class="fas fa-check-circle"></i> HADIR SEMUA
+                        </div>
+                        <p class="text-[#059669] text-[10px] font-bold uppercase tracking-wider opacity-80">
+                            Klik Hantar Laporan jika tiada murid yang tidak hadir
+                        </p>
+                    </div>
+
+                    <div id="absent-list-container" class="space-y-3 mb-4 empty:hidden"></div>
+
+                    <button onclick="addAbsentRow()" class="w-full py-3 border border-dashed border-indigo-300 text-indigo-600 text-sm font-bold rounded-2xl bg-indigo-50 hover:bg-indigo-100 transition flex items-center justify-center gap-2">
+                        <i class="fas fa-plus"></i> TAMBAH MURID
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-6 bg-white border-t border-gray-100 pb-8 md:pb-6">
+                <button onclick="submitAttendance()" id="submit-btn" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-base rounded-2xl shadow-[0_4px_14px_0_rgba(79,70,229,0.39)] transform transition active:scale-95 flex items-center justify-center gap-2 uppercase tracking-wide">
+                    Hantar Laporan
+                </button>
+                <button onclick="closeModal()" class="w-full mt-3 py-2 text-gray-400 font-bold text-xs uppercase tracking-wider hover:text-gray-600 transition">
+                    Batal
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CARTA MODAL BARU -->
+    <div id="chart-modal" class="fixed inset-0 z-40 hidden flex flex-col justify-end bg-gray-900 bg-opacity-40 backdrop-blur-sm transition-opacity duration-300">
+        <div class="bg-white rounded-t-[2rem] shadow-2xl h-[85vh] md:h-[80vh] w-full max-w-2xl mx-auto flex flex-col transform translate-y-full transition-transform duration-300" id="chart-modal-content">
+            
+            <div class="px-6 pt-6 pb-2 flex justify-between items-start relative">
+                <button onclick="closeChartModal()" class="w-10 h-10 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200 transition absolute left-6 z-10">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="w-full text-center mt-1">
+                    <h3 class="font-extrabold text-xl text-gray-900 uppercase tracking-tight">ANALISIS KEHADIRAN</h3>
+                    <p class="text-xs text-blue-500 font-bold uppercase mt-1" id="chart-modal-date">Memuatkan...</p>
+                </div>
+            </div>
+
+            <!-- Toggle Butang Harian/Bulanan -->
+            <div class="px-6 py-4 border-b border-gray-100 flex gap-2">
+                <button id="btn-chart-harian" onclick="renderCharts('harian')" class="flex-1 py-2.5 bg-indigo-600 text-white text-xs font-bold rounded-xl shadow-sm transition-all uppercase tracking-widest">
+                    Harian
+                </button>
+                <button id="btn-chart-bulanan" onclick="renderCharts('bulanan')" class="flex-1 py-2.5 bg-gray-100 text-gray-500 text-xs font-bold rounded-xl hover:bg-gray-200 transition-all uppercase tracking-widest">
+                    Bulanan
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-6 bg-slate-50">
+                <!-- Doughnut Chart: Hadir vs Tak Hadir -->
+                <div class="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 mb-6">
+                    <h4 class="text-center text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Keseluruhan Sekolah</h4>
+                    <div class="relative w-full max-w-[220px] mx-auto">
+                        <canvas id="pieChart"></canvas>
+                        <!-- Tengah-tengah carta Doughnut -->
+                        <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none pt-2">
+                            <span class="text-[10px] font-bold text-gray-400 uppercase">Hadir</span>
+                            <span class="text-2xl font-extrabold text-gray-800" id="chart-pie-center-pct">0%</span>
+                        </div>
+                    </div>
+                    <div class="flex justify-center gap-6 mt-4">
+                        <div class="text-center">
+                            <p class="text-[10px] font-bold text-gray-400 uppercase">Hadir</p>
+                            <p class="text-emerald-600 font-bold" id="chart-stat-hadir">0</p>
+                        </div>
+                        <div class="text-center border-l border-gray-200 pl-6">
+                            <p class="text-[10px] font-bold text-gray-400 uppercase">Tak Hadir</p>
+                            <p class="text-rose-500 font-bold" id="chart-stat-tak-hadir">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bar Chart: Perbandingan Kelas -->
+                <div class="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 mb-4">
+                    <h4 class="text-center text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Perbandingan Peratusan Kelas</h4>
+                    <div class="relative w-full h-[300px]">
+                        <canvas id="barChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // GANTIKAN URL INI DENGAN URL WEB APP ANDA NANTI
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxBufjWkJ5xGyof8flKH_o8ABR3zuygSnbdoCGSmpltW8duOPB4oNvWFOGZwEidTonl/exec';
+        
+        let state = {
+            classes: {},      
+            attendance: [],   
+            selectedDate: '', 
+            currentClassModal: '',
+            isLoading: true
+        };
+
+        // KEMAS KINI OBJEK ANALYTICS UNTUK SIMPAN DATA ASAL CARTA
+        let analytics = {
+            school: { dailyStr: '-', monthlyStr: '-', dailyExpected: 0, dailyAbsences: 0, monthlyExpected: 0, monthlyAbsences: 0 },
+            years: {},  
+            classes: {} 
+        };
+
+        const monthNames = ["Jan", "Feb", "Mac", "Apr", "Mei", "Jun", "Jul", "Ogo", "Sep", "Okt", "Nov", "Dis"];
+
+        // VARIABLES UNTUK CARTA
+        let pieChartInstance = null;
+        let barChartInstance = null;
+
+        window.onload = function() {
+            initDate();
+            fetchData();
+        };
+
+        function initDate() {
+            const today = new Date();
+            state.selectedDate = formatForInput(today);
+            document.getElementById('date-picker').value = state.selectedDate;
+            updateCustomDateDisplay();
+            updateLabels();
+        }
+
+        function formatForInput(dateObj) {
+            const y = dateObj.getFullYear();
+            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const d = String(dateObj.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        function changeDate() {
+            state.selectedDate = document.getElementById('date-picker').value;
+            updateCustomDateDisplay();
+            updateLabels();
+            processAnalytics();
+            renderDashboard();
+            renderClasses();
+        }
+        
+        function updateCustomDateDisplay() {
+            if(!state.selectedDate) return;
+            const dObj = new Date(state.selectedDate);
+            const day = String(dObj.getDate()).padStart(2, '0');
+            const month = monthNames[dObj.getMonth()];
+            const year = dObj.getFullYear();
+            document.getElementById('custom-date-display').innerText = `${day} ${month} ${year}`;
+            document.getElementById('chart-modal-date').innerText = `DATA: ${day} ${month} ${year}`;
+        }
+
+        function updateLabels() {
+            const d = new Date(state.selectedDate);
+            document.getElementById('lbl-hari').innerText = `${d.getDate()} ${monthNames[d.getMonth()]}`;
+            document.getElementById('lbl-bulan').innerText = `${monthNames[d.getMonth()]} ${d.getFullYear()}`;
+        }
+
+        async function fetchData() {
+            showLoading(true);
+            try {
+                if (!SCRIPT_URL) {
+                    injectMockData();
+                } else {
+                    const resClass = await fetch(`${SCRIPT_URL}?action=getClasses`);
+                    const dataClass = await resClass.json();
+                    if(dataClass.status === 'success') state.classes = dataClass.data;
+
+                    const resAtt = await fetch(`${SCRIPT_URL}?action=getAttendance`);
+                    const dataAtt = await resAtt.json();
+                    if(dataAtt.status === 'success') state.attendance = dataAtt.data;
+                }
+
+                processAnalytics();
+                renderDashboard();
+                renderClasses();
+                
+                setTimeout(() => showLoading(false), 800);
+            } catch (error) {
+                console.error("Ralat mengambil data:", error);
+                alert("Gagal menghubungi pangkalan data. Memuatkan data demo.");
+                injectMockData();
+                processAnalytics();
+                renderDashboard();
+                renderClasses();
+                showLoading(false);
+            }
+        }
+
+        function injectMockData() {
+            state.classes = {
+                "1 GEMILANG": ["Ahmad Badrul", "Aliya Maisara", "Chong Wei", "Diana Rosli"],
+                "1 CEMERLANG": ["Muthusamy", "Nurul Huda", "Osman Ali", "Puteri Balkis", "Qayyum"],
+                "2 GEMILANG": ["Raju", "Siti Aminah", "Tengku Zarif"],
+                "2 CEMERLANG": ["Umar", "Vimala", "Wafiy", "Xavier"],
+                "3 WAWASAN": ["Yusof", "Zainab", "Adam", "Bella"],
+                "PRASEKOLAH BINTANG": ["Cilik 1", "Cilik 2", "Cilik 3"]
+            };
+
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const yesterday = String(today.getDate() - 1 > 0 ? today.getDate() - 1 : 1).padStart(2, '0');
+            const todayStr = String(today.getDate()).padStart(2, '0');
+
+            state.attendance = [
+                { tarikh: `${year}-${month}-${yesterday}T00:00:00.000Z`, kelas: "1 GEMILANG", bilTakHadir: 0, namaTakHadir: [] },
+                { tarikh: `${year}-${month}-${yesterday}T00:00:00.000Z`, kelas: "1 CEMERLANG", bilTakHadir: 1, namaTakHadir: ["Muthusamy"] },
+                { tarikh: `${year}-${month}-${yesterday}T00:00:00.000Z`, kelas: "2 GEMILANG", bilTakHadir: 0, namaTakHadir: [] },
+                { tarikh: `${year}-${month}-${yesterday}T00:00:00.000Z`, kelas: "PRASEKOLAH BINTANG", bilTakHadir: 1, namaTakHadir: ["Cilik 1"] },
+                { tarikh: `${year}-${month}-${todayStr}T00:00:00.000Z`, kelas: "1 GEMILANG", bilTakHadir: 1, namaTakHadir: ["Aliya Maisara"] },
+                { tarikh: `${year}-${month}-${todayStr}T00:00:00.000Z`, kelas: "2 GEMILANG", bilTakHadir: 0, namaTakHadir: [] },
+            ];
+        }
+
+        function processAnalytics() {
+            const selectedDateObj = new Date(state.selectedDate);
+            const targetDateStr = selectedDateObj.toDateString(); 
+            const targetMonth = selectedDateObj.getMonth();
+            const targetYear = selectedDateObj.getFullYear();
+
+            analytics.years = {};
+            analytics.classes = {};
+            
+            let totalSchoolStudents = 0;
+            let totalSchoolDailyExpected = 0;
+            let totalSchoolDailyAbsences = 0;
+            let totalSchoolMonthlyExpected = 0;
+            let totalSchoolMonthlyAbsences = 0;
+
+            const allClassNames = Object.keys(state.classes);
+
+            allClassNames.forEach(className => {
+                const firstWord = className.split(' ')[0].toUpperCase();
+                const yearLabel = (firstWord === 'PRASEKOLAH' || firstWord === 'PRA') ? 'Prasekolah' : `Tahun ${firstWord}`;
+
+                if(!analytics.years[yearLabel]) {
+                    analytics.years[yearLabel] = {
+                        students: 0, dailyExpected: 0, dailyAbsences: 0, monthlyExpected: 0, monthlyAbsences: 0
+                    };
+                }
+
+                const studentsInClass = state.classes[className].length;
+                totalSchoolStudents += studentsInClass;
+                analytics.years[yearLabel].students += studentsInClass;
+
+                // Monthly Calculate
+                const classMonthRecords = state.attendance.filter(r => {
+                    const rDate = new Date(r.tarikh);
+                    return r.kelas === className && rDate.getMonth() === targetMonth && rDate.getFullYear() === targetYear;
+                });
+
+                const daysRecordedThisMonth = classMonthRecords.length;
+                const expectedMonthlyClass = daysRecordedThisMonth * studentsInClass;
+                const absencesMonthlyClass = classMonthRecords.reduce((sum, r) => sum + parseInt(r.bilTakHadir || 0), 0);
+
+                analytics.years[yearLabel].monthlyExpected += expectedMonthlyClass;
+                analytics.years[yearLabel].monthlyAbsences += absencesMonthlyClass;
+                totalSchoolMonthlyExpected += expectedMonthlyClass;
+                totalSchoolMonthlyAbsences += absencesMonthlyClass;
+
+                let monthlyPctClassStr = '- %';
+                let monthlyPctRaw = 0;
+                if(daysRecordedThisMonth > 0) {
+                    const pct = ((expectedMonthlyClass - absencesMonthlyClass) / expectedMonthlyClass) * 100;
+                    monthlyPctRaw = pct;
+                    monthlyPctClassStr = pct.toFixed(1) + '%';
+                }
+
+                // Daily Calculate
+                const todayRecord = state.attendance.find(r => {
+                    return r.kelas === className && new Date(r.tarikh).toDateString() === targetDateStr;
+                });
+
+                let hasFilledToday = false;
+                let dailyPctClassStr = '- %';
+                let dailyPctRaw = 0;
+
+                if (todayRecord) {
+                    hasFilledToday = true;
+                    const absences = parseInt(todayRecord.bilTakHadir || 0);
+                    
+                    analytics.years[yearLabel].dailyExpected += studentsInClass;
+                    analytics.years[yearLabel].dailyAbsences += absences;
+                    totalSchoolDailyExpected += studentsInClass;
+                    totalSchoolDailyAbsences += absences;
+
+                    const pct = ((studentsInClass - absences) / studentsInClass) * 100;
+                    dailyPctRaw = pct;
+                    dailyPctClassStr = pct.toFixed(1) + '%';
+                }
+
+                analytics.classes[className] = {
+                    dailyStr: dailyPctClassStr,
+                    monthlyStr: monthlyPctClassStr,
+                    hasFilledToday: hasFilledToday,
+                    students: studentsInClass,
+                    dailyPct: dailyPctRaw,
+                    monthlyPct: monthlyPctRaw
+                };
+            });
+
+            // Save raw data for charts
+            analytics.school.dailyExpected = totalSchoolDailyExpected;
+            analytics.school.dailyAbsences = totalSchoolDailyAbsences;
+            analytics.school.monthlyExpected = totalSchoolMonthlyExpected;
+            analytics.school.monthlyAbsences = totalSchoolMonthlyAbsences;
+
+            // Calculate Final School Strings
+            if (totalSchoolDailyExpected > 0) {
+                const schoolDaily = ((totalSchoolDailyExpected - totalSchoolDailyAbsences) / totalSchoolDailyExpected) * 100;
+                analytics.school.dailyStr = schoolDaily.toFixed(1) + '%';
+            } else {
+                analytics.school.dailyStr = '- %';
+            }
+
+            if (totalSchoolMonthlyExpected > 0) {
+                const schoolMonthly = ((totalSchoolMonthlyExpected - totalSchoolMonthlyAbsences) / totalSchoolMonthlyExpected) * 100;
+                analytics.school.monthlyStr = schoolMonthly.toFixed(1) + '%';
+            } else {
+                analytics.school.monthlyStr = '- %';
+            }
+
+            // Calculate Final Year Strings
+            Object.keys(analytics.years).forEach(year => {
+                const yData = analytics.years[year];
+                yData.dailyStr = '- %';
+                yData.monthlyStr = '- %';
+
+                if (yData.dailyExpected > 0) {
+                    yData.dailyStr = (((yData.dailyExpected - yData.dailyAbsences) / yData.dailyExpected) * 100).toFixed(1) + '%';
+                }
+                if (yData.monthlyExpected > 0) {
+                    yData.monthlyStr = (((yData.monthlyExpected - yData.monthlyAbsences) / yData.monthlyExpected) * 100).toFixed(1) + '%';
+                }
+            });
+        }
+
+        function renderDashboard() {
+            document.getElementById('school-daily-pct').innerText = analytics.school.dailyStr;
+            document.getElementById('school-monthly-pct').innerText = analytics.school.monthlyStr;
+
+            const totalClasses = Object.keys(state.classes).length;
+            const filledClasses = Object.values(analytics.classes).filter(c => c.hasFilledToday).length;
+            const statText = document.getElementById('school-status-text');
+            
+            statText.className = "text-blue-600 font-bold text-lg mt-1";
+            
+            if(filledClasses === 0) statText.innerText = "Belum Ada Pengisian";
+            else if(filledClasses < totalClasses) statText.innerText = `Diisi: ${filledClasses}/${totalClasses} Kelas`;
+            else statText.innerText = "Semua Kelas Diisi";
+
+            const yearsContainer = document.getElementById('years-container');
+            yearsContainer.innerHTML = ''; 
+            
+            const sortedYears = Object.keys(analytics.years).sort((a,b) => a.localeCompare(b));
+
+            sortedYears.forEach(year => {
+                const yData = analytics.years[year];
+                const box = document.createElement('div');
+                box.className = 'flex-shrink-0 bg-white border border-gray-200 rounded-2xl p-3 w-40 shadow-sm relative overflow-hidden';
+                
+                box.innerHTML = `
+                    <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-500"></div>
+                    <p class="font-extrabold text-gray-800 text-sm mb-2 ml-1.5">${year}</p>
+                    <div class="flex justify-between items-end ml-1.5">
+                        <div class="bg-indigo-50 px-2 py-1 rounded-lg">
+                            <p class="text-[8px] text-indigo-400 uppercase font-bold text-center">Harian</p>
+                            <p class="text-indigo-700 font-bold text-xs">${yData.dailyStr}</p>
+                        </div>
+                        <div class="bg-emerald-50 px-2 py-1 rounded-lg text-right">
+                            <p class="text-[8px] text-emerald-400 uppercase font-bold text-center">Bulanan</p>
+                            <p class="text-emerald-700 font-bold text-xs">${yData.monthlyStr}</p>
+                        </div>
+                    </div>
+                `;
+                yearsContainer.appendChild(box);
+            });
+        }
+
+        function renderClasses() {
+            const container = document.getElementById('classes-container');
+            container.innerHTML = '';
+
+            const allClassNames = Object.keys(state.classes).sort();
+            const selectedDateObj = new Date(state.selectedDate);
+            const targetDateStr = selectedDateObj.toDateString();
+
+            allClassNames.forEach(className => {
+                const cData = analytics.classes[className];
+                const isFilled = cData.hasFilledToday;
+
+                const todayRecord = state.attendance.find(r => {
+                    return r.kelas === className && new Date(r.tarikh).toDateString() === targetDateStr;
+                });
+
+                const card = document.createElement('div');
+                card.className = `bg-white border rounded-3xl p-4 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden flex flex-col justify-between h-full ${isFilled ? 'border-emerald-200 bg-emerald-50/10' : 'border-gray-200'}`;
+
+                const badgeColor = isFilled ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700';
+                const badgeIcon = isFilled ? 'fa-check' : 'fa-exclamation-circle';
+                const badgeText = isFilled ? 'Selesai' : 'Belum Isi';
+
+                let absentListHtml = '';
+                if (isFilled && todayRecord) {
+                    const absentNames = todayRecord.namaTakHadir || [];
+                    const absentCount = parseInt(todayRecord.bilTakHadir) || 0;
+
+                    if (absentCount === 0 || (absentNames.length === 1 && absentNames[0] === 'Hadir Semua')) {
+                        absentListHtml = `
+                            <div class="mt-4 mb-2 flex-1">
+                                <p class="font-bold text-emerald-600 text-sm"><i class="fas fa-check-circle"></i> Hadir Semua</p>
+                            </div>
+                        `;
+                    } else {
+                        let badgesHtml = absentNames.map(name => {
+                            if(name.trim() === '') return '';
+                            return `<span class="inline-block bg-rose-50 text-rose-600 text-[11px] font-bold px-2 py-1.5 rounded-lg mb-2 mr-2 border border-rose-100">${name}</span>`;
+                        }).join('');
+
+                        absentListHtml = `
+                            <div class="mt-4 mb-2 flex-1">
+                                <p class="font-bold text-rose-600 text-[11px] mb-2 uppercase tracking-wide">${absentCount} Murid Tidak Hadir</p>
+                                <div class="flex flex-wrap">
+                                    ${badgesHtml}
+                                </div>
+                            </div>
+                        `;
+                    }
+                } else {
+                    absentListHtml = `<div class="flex-1"></div>`; 
+                }
+
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <h4 class="font-extrabold text-lg text-gray-900">${className}</h4>
+                                <span class="text-[10px] font-bold px-2.5 py-1 rounded-full ${badgeColor} inline-flex items-center mt-1 uppercase tracking-wider">
+                                    <i class="fas ${badgeIcon} mr-1"></i> ${badgeText}
+                                </span>
+                            </div>
+                            <div class="bg-gray-50 rounded-xl px-2.5 py-1.5 border border-gray-100 flex gap-3 text-right">
+                                <div>
+                                    <span class="block text-[8px] uppercase font-bold text-gray-400">Harian</span>
+                                    <span class="block text-sm font-bold ${isFilled ? 'text-indigo-600' : 'text-gray-400'}">${cData.dailyStr}</span>
+                                </div>
+                                <div class="border-l border-gray-200 pl-3">
+                                    <span class="block text-[8px] uppercase font-bold text-gray-400">Bulanan</span>
+                                    <span class="block text-sm font-bold text-emerald-600">${cData.monthlyStr}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        ${absentListHtml}
+                    </div>
+                    
+                    <button onclick="openModal('${className}')" class="w-full mt-3 py-3 rounded-2xl text-sm font-bold transition-colors ${isFilled ? 'bg-gray-100 text-gray-500 hover:bg-gray-200 uppercase tracking-widest' : 'bg-blue-600 text-white hover:bg-blue-700 uppercase tracking-widest'}">
+                        ${isFilled ? 'Kemaskini' : 'Isi Kehadiran'}
+                    </button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // --- FUNGSI MODAL CARTA BARU ---
+
+        function openChartModal() {
+            const modal = document.getElementById('chart-modal');
+            const content = document.getElementById('chart-modal-content');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('translate-y-full');
+            }, 10);
+            
+            // Default buka carta harian
+            renderCharts('harian');
+        }
+
+        function closeChartModal() {
+            const modal = document.getElementById('chart-modal');
+            const content = document.getElementById('chart-modal-content');
+            content.classList.add('translate-y-full');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        function renderCharts(mode) {
+            // Tukar butang warna aktif
+            const btnHarian = document.getElementById('btn-chart-harian');
+            const btnBulanan = document.getElementById('btn-chart-bulanan');
+            
+            if (mode === 'harian') {
+                btnHarian.className = "flex-1 py-2.5 bg-indigo-600 text-white text-xs font-bold rounded-xl shadow-sm transition-all uppercase tracking-widest";
+                btnBulanan.className = "flex-1 py-2.5 bg-gray-100 text-gray-500 text-xs font-bold rounded-xl hover:bg-gray-200 transition-all uppercase tracking-widest";
+                document.getElementById('chart-modal-date').innerText = `DATA HARIAN: ${document.getElementById('custom-date-display').innerText}`;
+            } else {
+                btnHarian.className = "flex-1 py-2.5 bg-gray-100 text-gray-500 text-xs font-bold rounded-xl hover:bg-gray-200 transition-all uppercase tracking-widest";
+                btnBulanan.className = "flex-1 py-2.5 bg-emerald-600 text-white text-xs font-bold rounded-xl shadow-sm transition-all uppercase tracking-widest";
+                document.getElementById('chart-modal-date').innerText = `DATA BULANAN: ${document.getElementById('lbl-bulan').innerText}`;
+            }
+
+            // 1. DATA CARTA PAI (KESELURUHAN)
+            let expected = mode === 'harian' ? analytics.school.dailyExpected : analytics.school.monthlyExpected;
+            let absences = mode === 'harian' ? analytics.school.dailyAbsences : analytics.school.monthlyAbsences;
+            let present = expected - absences;
+            
+            let pctHadir = expected > 0 ? ((present / expected) * 100).toFixed(1) : 0;
+
+            document.getElementById('chart-stat-hadir').innerText = present;
+            document.getElementById('chart-stat-tak-hadir').innerText = absences;
+            document.getElementById('chart-pie-center-pct').innerText = expected > 0 ? `${pctHadir}%` : '-';
+
+            const ctxPie = document.getElementById('pieChart').getContext('2d');
+            if(pieChartInstance) pieChartInstance.destroy();
+            
+            pieChartInstance = new Chart(ctxPie, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Hadir', 'Tak Hadir'],
+                    datasets: [{
+                        data: expected > 0 ? [present, absences] : [1, 0], // letak 1 supaya kelabu jika tiada data
+                        backgroundColor: expected > 0 ? ['#059669', '#f43f5e'] : ['#e5e7eb', '#e5e7eb'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    cutout: '75%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: expected > 0 }
+                    }
+                }
+            });
+
+            // 2. DATA CARTA PALANG (KELAS)
+            const classNames = Object.keys(state.classes).sort();
+            const classPcts = classNames.map(c => {
+                let p = mode === 'harian' ? analytics.classes[c].dailyPct : analytics.classes[c].monthlyPct;
+                // Jika harian dan belum diisi, set kosong (0)
+                if(mode === 'harian' && !analytics.classes[c].hasFilledToday) p = 0;
+                return parseFloat(p).toFixed(1);
+            });
+
+            // Warna bar: Biru untuk harian, Hijau Emerald untuk bulanan
+            const barColor = mode === 'harian' ? '#4f46e5' : '#059669';
+
+            const ctxBar = document.getElementById('barChart').getContext('2d');
+            if(barChartInstance) barChartInstance.destroy();
+
+            barChartInstance = new Chart(ctxBar, {
+                type: 'bar',
+                data: {
+                    labels: classNames,
+                    datasets: [{
+                        label: 'Peratusan Kehadiran (%)',
+                        data: classPcts,
+                        backgroundColor: barColor,
+                        borderRadius: 4,
+                        barPercentage: 0.6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { 
+                            beginAtZero: true, 
+                            max: 100,
+                            grid: { color: '#f3f4f6' },
+                            ticks: { font: { size: 10 } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { 
+                                font: { size: 9 },
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.raw + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- FUNGSI MODAL KEHADIRAN MURID ---
+
+        function openModal(className) {
+            state.currentClassModal = className;
+            document.getElementById('modal-class-name').innerText = className;
+            
+            const dObj = new Date(state.selectedDate);
+            document.getElementById('modal-date-display').innerText = `${dObj.getDate()} ${monthNames[dObj.getMonth()]} ${dObj.getFullYear()}`;
+
+            const targetDateStr = dObj.toDateString();
+            const existingRecord = state.attendance.find(r => 
+                r.kelas === className && new Date(r.tarikh).toDateString() === targetDateStr
+            );
+            
+            const absentList = existingRecord && existingRecord.namaTakHadir ? existingRecord.namaTakHadir : [];
+            const container = document.getElementById('absent-list-container');
+            
+            container.innerHTML = '';
+            
+            if (absentList.length === 0) {
+                document.getElementById('hadir-semua-banner').style.display = 'block';
+            } else {
+                document.getElementById('hadir-semua-banner').style.display = 'none';
+                absentList.forEach(name => {
+                    if (name.trim() !== '') addAbsentRow(name);
+                });
+            }
+
+            const modal = document.getElementById('attendance-modal');
+            const content = document.getElementById('attendance-modal-content');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('translate-y-full');
+            }, 10);
+        }
+
+        function addAbsentRow(selectedName = '') {
+            const container = document.getElementById('absent-list-container');
+            document.getElementById('hadir-semua-banner').style.display = 'none';
+
+            const row = document.createElement('div');
+            row.className = 'flex items-center gap-2 absent-row animate-fade-in';
+            
+            row.innerHTML = `
+                <select onchange="updateDropdownOptions()" class="absent-select flex-1 p-3.5 border border-gray-200 rounded-2xl bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-semibold text-gray-700">
+                    <option value="">-- PILIH NAMA MURID --</option>
+                </select>
+                <button onclick="removeAbsentRow(this)" class="w-12 h-12 flex-shrink-0 bg-red-50 text-red-500 rounded-2xl border border-red-100 flex items-center justify-center hover:bg-red-100 transition shadow-sm">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            container.appendChild(row);
+
+            if (selectedName) {
+                const select = row.querySelector('.absent-select');
+                const opt = document.createElement('option');
+                opt.value = selectedName;
+                opt.text = selectedName;
+                select.appendChild(opt);
+                select.value = selectedName;
+            }
+            updateDropdownOptions();
+        }
+
+        function updateDropdownOptions() {
+            const selects = document.querySelectorAll('.absent-select');
+            const allStudents = state.classes[state.currentClassModal] || [];
+            const selectedValues = Array.from(selects).map(s => s.value).filter(v => v !== '');
+
+            selects.forEach(select => {
+                const currentValue = select.value;
+                select.innerHTML = '<option value="">-- PILIH NAMA MURID --</option>';
+                
+                allStudents.forEach(student => {
+                    if (!selectedValues.includes(student) || student === currentValue) {
+                        const option = document.createElement('option');
+                        option.value = student;
+                        option.text = student;
+                        if (student === currentValue) {
+                            option.selected = true;
+                        }
+                        select.appendChild(option);
+                    }
+                });
+            });
+        }
+
+        function removeAbsentRow(btnElement) {
+            const row = btnElement.parentElement;
+            row.remove();
+            
+            const container = document.getElementById('absent-list-container');
+            if (container.children.length === 0) {
+                document.getElementById('hadir-semua-banner').style.display = 'block';
+            }
+            updateDropdownOptions();
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('attendance-modal');
+            const content = document.getElementById('attendance-modal-content');
+            content.classList.add('translate-y-full');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        async function submitAttendance() {
+            const className = state.currentClassModal;
+            
+            let namaTakHadir = [];
+            const selects = document.querySelectorAll('.absent-select');
+            
+            selects.forEach(select => {
+                const val = select.value;
+                if (val && val !== '') {
+                    namaTakHadir.push(val);
+                }
+            });
+
+            namaTakHadir = [...new Set(namaTakHadir)];
+            const bilTakHadir = namaTakHadir.length;
+
+            const d = new Date(state.selectedDate);
+            const dateForApi = `${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}-${d.getFullYear()}`;
+
+            const payload = {
+                tarikh: dateForApi,
+                kelas: className,
+                bilTakHadir: bilTakHadir,
+                namaTakHadir: namaTakHadir
+            };
+
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> MENYIMPAN...';
+
+            if (!SCRIPT_URL) {
+                setTimeout(() => {
+                    const targetDateStr = d.toDateString();
+                    const existingIndex = state.attendance.findIndex(r => 
+                        r.kelas === className && new Date(r.tarikh).toDateString() === targetDateStr
+                    );
+                    
+                    const newRecord = { 
+                        tarikh: d.toISOString(), 
+                        kelas: className, 
+                        bilTakHadir: bilTakHadir, 
+                        namaTakHadir: namaTakHadir 
+                    };
+
+                    if(existingIndex >= 0) state.attendance[existingIndex] = newRecord;
+                    else state.attendance.push(newRecord);
+
+                    finishSubmission();
+                }, 1000);
+            } else {
+                try {
+                    const response = await fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({ action: 'simpanKehadiran', payload: payload })
+                    });
+                    const resData = await response.json();
+                    
+                    if(resData.status === 'success') {
+                        const resAtt = await fetch(`${SCRIPT_URL}?action=getAttendance`);
+                        const dataAtt = await resAtt.json();
+                        if(dataAtt.status === 'success') state.attendance = dataAtt.data;
+                        
+                        finishSubmission();
+                    } else {
+                        alert("Ralat semasa menyimpan. Sila cuba lagi.");
+                        resetBtn();
+                    }
+                } catch (error) {
+                    console.error("Error saving:", error);
+                    alert("Ralat sambungan. Gagal menyimpan.");
+                    resetBtn();
+                }
+            }
+        }
+
+        function finishSubmission() {
+            closeModal();
+            resetBtn();
+            processAnalytics();
+            renderDashboard();
+            renderClasses();
+            showSuccessPopup();
+        }
+
+        function resetBtn() {
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = false;
+            btn.innerHTML = 'HANTAR LAPORAN';
+        }
+
+        function showLoading(show) {
+            const loader = document.getElementById('loading-screen');
+            if (show) {
+                loader.classList.remove('hidden');
+                setTimeout(() => loader.classList.remove('opacity-0'), 10);
+            } else {
+                loader.classList.add('opacity-0');
+                setTimeout(() => loader.classList.add('hidden'), 500);
+            }
+        }
+
+        function showSuccessPopup() {
+            const screen = document.getElementById('success-screen');
+            const logo = document.getElementById('success-logo');
+            
+            logo.classList.remove('animate-zoom-3x');
+            void logo.offsetWidth; 
+            
+            screen.classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('success-card').classList.remove('scale-95');
+                document.getElementById('success-card').classList.add('scale-100');
+                logo.classList.add('animate-zoom-3x'); 
+            }, 10);
+        }
+
+        function closeSuccess() {
+            const screen = document.getElementById('success-screen');
+            document.getElementById('success-card').classList.remove('scale-100');
+            document.getElementById('success-card').classList.add('scale-95');
+            screen.classList.add('opacity-0');
+            setTimeout(() => {
+                screen.classList.add('hidden');
+                screen.classList.remove('opacity-0');
+            }, 300);
+        }
+
+    </script>
+</body>
+</html>
