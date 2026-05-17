@@ -8,7 +8,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- TAMBAH CHART.JS UNTUK CARTA -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
@@ -50,7 +49,6 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
         }
 
-        /* Hide scrollbar for horizontal scrolling containers */
         .no-scrollbar::-webkit-scrollbar {
             display: none;
         }
@@ -59,7 +57,6 @@
             scrollbar-width: none;
         }
         
-        /* Dropdown styling adjustments */
         select {
             -webkit-appearance: none;
             -moz-appearance: none;
@@ -70,7 +67,6 @@
             background-size: 1em;
         }
 
-        /* Date picker custom overlap */
         input[type="date"]::-webkit-calendar-picker-indicator {
             background: transparent;
             bottom: 0;
@@ -87,11 +83,10 @@
 </head>
 <body class="text-gray-800 antialiased h-screen flex flex-col overflow-hidden">
 
-    <!-- Loading Screen -->
     <div id="loading-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white bg-opacity-95 backdrop-blur-sm transition-opacity duration-500">
         <img src="https://i.postimg.cc/8kZTp26j/SK-Tg-Karang.png" alt="Logo SK Tg Karang" class="w-40 h-40 object-contain mb-6 animate-heartbeat drop-shadow-xl">
         <h2 class="text-xl md:text-2xl font-bold text-center text-blue-900 px-6 uppercase tracking-wider">
-            DATA KEHADIRAN SK TANJUNG KARANG SEDANG LOADING
+            DATA KEHADIRAN SK TANJONG KARANG SEDANG LOADING
         </h2>
         <div class="mt-8 flex space-x-2">
             <div class="w-3 h-3 bg-blue-600 rounded-full animate-bounce" style="animation-delay: 0s;"></div>
@@ -100,7 +95,6 @@
         </div>
     </div>
 
-    <!-- Success Screen -->
     <div id="success-screen" class="fixed inset-0 z-50 hidden flex flex-col items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm transition-opacity duration-300">
         <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full mx-4 p-8 flex flex-col items-center transform transition-transform scale-95" id="success-card">
             <img src="https://i.postimg.cc/8kZTp26j/SK-Tg-Karang.png" id="success-logo" alt="Logo" class="w-32 h-32 object-contain mb-6 drop-shadow-md">
@@ -109,7 +103,7 @@
                 PENGESAHAN BERJAYA
             </h2>
             <p class="text-center text-gray-700 font-medium mb-8 uppercase leading-relaxed">
-                GPK HEM SK TG KARANG MENGUCAPKAN TERIMA KASIH ATAS KERJASAMA ANDA
+                GPK HEM SK TANJONG KARANG MENGUCAPKAN TERIMA KASIH ATAS KERJASAMA ANDA
             </p>
             
             <button onclick="closeSuccess()" class="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl shadow-md transition-colors flex items-center justify-center gap-2">
@@ -119,7 +113,6 @@
     </div>
 
     <div class="flex-1 overflow-y-auto w-full pb-20 relative">
-        <!-- Header Baru -->
         <header class="bg-white text-center pt-8 pb-10 px-4 rounded-b-[2.5rem] shadow-[0_4px_20px_-5px_rgba(0,0,0,0.05)] relative z-10 border-b border-gray-100">
             <div class="max-w-4xl mx-auto flex flex-col items-center justify-center gap-3">
                 <img src="https://i.postimg.cc/8kZTp26j/SK-Tg-Karang.png" alt="Logo" class="w-24 h-24 object-contain drop-shadow-sm">
@@ -134,10 +127,8 @@
 
         <main class="max-w-4xl mx-auto px-4 mt-6 relative z-20">
             
-            <!-- Overall School Analytics Card -->
             <div class="glass-card rounded-2xl p-5 mb-6 flex flex-col md:flex-row gap-4 items-center justify-between border border-gray-200">
                 <div class="flex items-center gap-4 w-full md:w-auto">
-                    <!-- ICON CHART BOLEH KLIK -->
                     <div onclick="openChartModal()" class="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-2xl border border-blue-100 cursor-pointer hover:bg-blue-100 hover:scale-105 transition-all shadow-sm group relative">
                         <i class="fas fa-chart-pie group-hover:animate-pulse"></i>
                         <span class="absolute -top-2 -right-2 flex h-4 w-4">
@@ -162,7 +153,6 @@
                 </div>
             </div>
 
-            <!-- Date Picker -->
             <div class="bg-white rounded-2xl shadow-sm p-4 mb-6 border border-gray-200 relative overflow-hidden flex items-center gap-3 hover:bg-gray-50 transition-colors cursor-pointer group">
                 <input type="date" id="date-picker" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onchange="changeDate()">
                 <div class="w-12 h-12 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center border border-orange-100 pointer-events-none group-hover:bg-orange-100 transition-colors">
@@ -180,21 +170,18 @@
             <div class="mb-6">
                 <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wide mb-3 px-1">Peratusan Mengikut Tahun</h3>
                 <div class="flex overflow-x-auto no-scrollbar gap-3 pb-2" id="years-container">
-                    <!-- Year cards generated here -->
-                </div>
+                    </div>
             </div>
 
             <div>
                 <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wide mb-3 px-1">Senarai Kelas</h3>
                 <div id="classes-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 pb-8">
-                    <!-- Class cards generated here -->
-                </div>
+                    </div>
             </div>
 
         </main>
     </div>
 
-    <!-- Modal Form (Borang Kehadiran) -->
     <div id="attendance-modal" class="fixed inset-0 z-40 hidden flex flex-col justify-end bg-gray-900 bg-opacity-40 backdrop-blur-sm transition-opacity duration-300">
         <div class="bg-white rounded-t-[2rem] shadow-2xl h-[85vh] md:h-[70vh] w-full max-w-2xl mx-auto flex flex-col transform translate-y-full transition-transform duration-300" id="attendance-modal-content">
             
@@ -244,7 +231,6 @@
         </div>
     </div>
 
-    <!-- CARTA MODAL BARU -->
     <div id="chart-modal" class="fixed inset-0 z-40 hidden flex flex-col justify-end bg-gray-900 bg-opacity-40 backdrop-blur-sm transition-opacity duration-300">
         <div class="bg-white rounded-t-[2rem] shadow-2xl h-[85vh] md:h-[80vh] w-full max-w-2xl mx-auto flex flex-col transform translate-y-full transition-transform duration-300" id="chart-modal-content">
             
@@ -258,7 +244,6 @@
                 </div>
             </div>
 
-            <!-- Toggle Butang Harian/Bulanan -->
             <div class="px-6 py-4 border-b border-gray-100 flex gap-2">
                 <button id="btn-chart-harian" onclick="renderCharts('harian')" class="flex-1 py-2.5 bg-indigo-600 text-white text-xs font-bold rounded-xl shadow-sm transition-all uppercase tracking-widest">
                     Harian
@@ -269,12 +254,10 @@
             </div>
 
             <div class="flex-1 overflow-y-auto p-6 bg-slate-50">
-                <!-- Doughnut Chart: Hadir vs Tak Hadir -->
                 <div class="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 mb-6">
                     <h4 class="text-center text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Keseluruhan Sekolah</h4>
                     <div class="relative w-full max-w-[220px] mx-auto">
                         <canvas id="pieChart"></canvas>
-                        <!-- Tengah-tengah carta Doughnut -->
                         <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none pt-2">
                             <span class="text-[10px] font-bold text-gray-400 uppercase">Hadir</span>
                             <span class="text-2xl font-extrabold text-gray-800" id="chart-pie-center-pct">0%</span>
@@ -292,7 +275,6 @@
                     </div>
                 </div>
 
-                <!-- Bar Chart: Perbandingan Kelas -->
                 <div class="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 mb-4">
                     <h4 class="text-center text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Perbandingan Peratusan Kelas</h4>
                     <div class="relative w-full h-[300px]">
@@ -304,7 +286,6 @@
     </div>
 
     <script>
-        // GANTIKAN URL INI DENGAN URL WEB APP ANDA NANTI
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxBufjWkJ5xGyof8flKH_o8ABR3zuygSnbdoCGSmpltW8duOPB4oNvWFOGZwEidTonl/exec';
         
         let state = {
@@ -315,7 +296,6 @@
             isLoading: true
         };
 
-        // KEMAS KINI OBJEK ANALYTICS UNTUK SIMPAN DATA ASAL CARTA
         let analytics = {
             school: { dailyStr: '-', monthlyStr: '-', dailyExpected: 0, dailyAbsences: 0, monthlyExpected: 0, monthlyAbsences: 0 },
             years: {},  
@@ -324,7 +304,6 @@
 
         const monthNames = ["Jan", "Feb", "Mac", "Apr", "Mei", "Jun", "Jul", "Ogo", "Sep", "Okt", "Nov", "Dis"];
 
-        // VARIABLES UNTUK CARTA
         let pieChartInstance = null;
         let barChartInstance = null;
 
@@ -461,7 +440,6 @@
                 totalSchoolStudents += studentsInClass;
                 analytics.years[yearLabel].students += studentsInClass;
 
-                // Monthly Calculate
                 const classMonthRecords = state.attendance.filter(r => {
                     const rDate = new Date(r.tarikh);
                     return r.kelas === className && rDate.getMonth() === targetMonth && rDate.getFullYear() === targetYear;
@@ -484,7 +462,6 @@
                     monthlyPctClassStr = pct.toFixed(1) + '%';
                 }
 
-                // Daily Calculate
                 const todayRecord = state.attendance.find(r => {
                     return r.kelas === className && new Date(r.tarikh).toDateString() === targetDateStr;
                 });
@@ -517,13 +494,11 @@
                 };
             });
 
-            // Save raw data for charts
             analytics.school.dailyExpected = totalSchoolDailyExpected;
             analytics.school.dailyAbsences = totalSchoolDailyAbsences;
             analytics.school.monthlyExpected = totalSchoolMonthlyExpected;
             analytics.school.monthlyAbsences = totalSchoolMonthlyAbsences;
 
-            // Calculate Final School Strings
             if (totalSchoolDailyExpected > 0) {
                 const schoolDaily = ((totalSchoolDailyExpected - totalSchoolDailyAbsences) / totalSchoolDailyExpected) * 100;
                 analytics.school.dailyStr = schoolDaily.toFixed(1) + '%';
@@ -538,7 +513,6 @@
                 analytics.school.monthlyStr = '- %';
             }
 
-            // Calculate Final Year Strings
             Object.keys(analytics.years).forEach(year => {
                 const yData = analytics.years[year];
                 yData.dailyStr = '- %';
@@ -680,8 +654,6 @@
             });
         }
 
-        // --- FUNGSI MODAL CARTA BARU ---
-
         function openChartModal() {
             const modal = document.getElementById('chart-modal');
             const content = document.getElementById('chart-modal-content');
@@ -690,7 +662,6 @@
                 content.classList.remove('translate-y-full');
             }, 10);
             
-            // Default buka carta harian
             renderCharts('harian');
         }
 
@@ -704,7 +675,6 @@
         }
 
         function renderCharts(mode) {
-            // Tukar butang warna aktif
             const btnHarian = document.getElementById('btn-chart-harian');
             const btnBulanan = document.getElementById('btn-chart-bulanan');
             
@@ -718,7 +688,6 @@
                 document.getElementById('chart-modal-date').innerText = `DATA BULANAN: ${document.getElementById('lbl-bulan').innerText}`;
             }
 
-            // 1. DATA CARTA PAI (KESELURUHAN)
             let expected = mode === 'harian' ? analytics.school.dailyExpected : analytics.school.monthlyExpected;
             let absences = mode === 'harian' ? analytics.school.dailyAbsences : analytics.school.monthlyAbsences;
             let present = expected - absences;
@@ -737,7 +706,7 @@
                 data: {
                     labels: ['Hadir', 'Tak Hadir'],
                     datasets: [{
-                        data: expected > 0 ? [present, absences] : [1, 0], // letak 1 supaya kelabu jika tiada data
+                        data: expected > 0 ? [present, absences] : [1, 0],
                         backgroundColor: expected > 0 ? ['#059669', '#f43f5e'] : ['#e5e7eb', '#e5e7eb'],
                         borderWidth: 0,
                         hoverOffset: 4
@@ -753,16 +722,13 @@
                 }
             });
 
-            // 2. DATA CARTA PALANG (KELAS)
             const classNames = Object.keys(state.classes).sort();
             const classPcts = classNames.map(c => {
                 let p = mode === 'harian' ? analytics.classes[c].dailyPct : analytics.classes[c].monthlyPct;
-                // Jika harian dan belum diisi, set kosong (0)
                 if(mode === 'harian' && !analytics.classes[c].hasFilledToday) p = 0;
                 return parseFloat(p).toFixed(1);
             });
 
-            // Warna bar: Biru untuk harian, Hijau Emerald untuk bulanan
             const barColor = mode === 'harian' ? '#4f46e5' : '#059669';
 
             const ctxBar = document.getElementById('barChart').getContext('2d');
@@ -804,250 +770,4 @@
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    return context.raw + '%';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // --- FUNGSI MODAL KEHADIRAN MURID ---
-
-        function openModal(className) {
-            state.currentClassModal = className;
-            document.getElementById('modal-class-name').innerText = className;
-            
-            const dObj = new Date(state.selectedDate);
-            document.getElementById('modal-date-display').innerText = `${dObj.getDate()} ${monthNames[dObj.getMonth()]} ${dObj.getFullYear()}`;
-
-            const targetDateStr = dObj.toDateString();
-            const existingRecord = state.attendance.find(r => 
-                r.kelas === className && new Date(r.tarikh).toDateString() === targetDateStr
-            );
-            
-            const absentList = existingRecord && existingRecord.namaTakHadir ? existingRecord.namaTakHadir : [];
-            const container = document.getElementById('absent-list-container');
-            
-            container.innerHTML = '';
-            
-            if (absentList.length === 0) {
-                document.getElementById('hadir-semua-banner').style.display = 'block';
-            } else {
-                document.getElementById('hadir-semua-banner').style.display = 'none';
-                absentList.forEach(name => {
-                    if (name.trim() !== '') addAbsentRow(name);
-                });
-            }
-
-            const modal = document.getElementById('attendance-modal');
-            const content = document.getElementById('attendance-modal-content');
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                content.classList.remove('translate-y-full');
-            }, 10);
-        }
-
-        function addAbsentRow(selectedName = '') {
-            const container = document.getElementById('absent-list-container');
-            document.getElementById('hadir-semua-banner').style.display = 'none';
-
-            const row = document.createElement('div');
-            row.className = 'flex items-center gap-2 absent-row animate-fade-in';
-            
-            row.innerHTML = `
-                <select onchange="updateDropdownOptions()" class="absent-select flex-1 p-3.5 border border-gray-200 rounded-2xl bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-semibold text-gray-700">
-                    <option value="">-- PILIH NAMA MURID --</option>
-                </select>
-                <button onclick="removeAbsentRow(this)" class="w-12 h-12 flex-shrink-0 bg-red-50 text-red-500 rounded-2xl border border-red-100 flex items-center justify-center hover:bg-red-100 transition shadow-sm">
-                    <i class="fas fa-times"></i>
-                </button>
-            `;
-            
-            container.appendChild(row);
-
-            if (selectedName) {
-                const select = row.querySelector('.absent-select');
-                const opt = document.createElement('option');
-                opt.value = selectedName;
-                opt.text = selectedName;
-                select.appendChild(opt);
-                select.value = selectedName;
-            }
-            updateDropdownOptions();
-        }
-
-        function updateDropdownOptions() {
-            const selects = document.querySelectorAll('.absent-select');
-            const allStudents = state.classes[state.currentClassModal] || [];
-            const selectedValues = Array.from(selects).map(s => s.value).filter(v => v !== '');
-
-            selects.forEach(select => {
-                const currentValue = select.value;
-                select.innerHTML = '<option value="">-- PILIH NAMA MURID --</option>';
-                
-                allStudents.forEach(student => {
-                    if (!selectedValues.includes(student) || student === currentValue) {
-                        const option = document.createElement('option');
-                        option.value = student;
-                        option.text = student;
-                        if (student === currentValue) {
-                            option.selected = true;
-                        }
-                        select.appendChild(option);
-                    }
-                });
-            });
-        }
-
-        function removeAbsentRow(btnElement) {
-            const row = btnElement.parentElement;
-            row.remove();
-            
-            const container = document.getElementById('absent-list-container');
-            if (container.children.length === 0) {
-                document.getElementById('hadir-semua-banner').style.display = 'block';
-            }
-            updateDropdownOptions();
-        }
-
-        function closeModal() {
-            const modal = document.getElementById('attendance-modal');
-            const content = document.getElementById('attendance-modal-content');
-            content.classList.add('translate-y-full');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 300);
-        }
-
-        async function submitAttendance() {
-            const className = state.currentClassModal;
-            
-            let namaTakHadir = [];
-            const selects = document.querySelectorAll('.absent-select');
-            
-            selects.forEach(select => {
-                const val = select.value;
-                if (val && val !== '') {
-                    namaTakHadir.push(val);
-                }
-            });
-
-            namaTakHadir = [...new Set(namaTakHadir)];
-            const bilTakHadir = namaTakHadir.length;
-
-            const d = new Date(state.selectedDate);
-            const dateForApi = `${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}-${d.getFullYear()}`;
-
-            const payload = {
-                tarikh: dateForApi,
-                kelas: className,
-                bilTakHadir: bilTakHadir,
-                namaTakHadir: namaTakHadir
-            };
-
-            const btn = document.getElementById('submit-btn');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> MENYIMPAN...';
-
-            if (!SCRIPT_URL) {
-                setTimeout(() => {
-                    const targetDateStr = d.toDateString();
-                    const existingIndex = state.attendance.findIndex(r => 
-                        r.kelas === className && new Date(r.tarikh).toDateString() === targetDateStr
-                    );
-                    
-                    const newRecord = { 
-                        tarikh: d.toISOString(), 
-                        kelas: className, 
-                        bilTakHadir: bilTakHadir, 
-                        namaTakHadir: namaTakHadir 
-                    };
-
-                    if(existingIndex >= 0) state.attendance[existingIndex] = newRecord;
-                    else state.attendance.push(newRecord);
-
-                    finishSubmission();
-                }, 1000);
-            } else {
-                try {
-                    const response = await fetch(SCRIPT_URL, {
-                        method: 'POST',
-                        body: JSON.stringify({ action: 'simpanKehadiran', payload: payload })
-                    });
-                    const resData = await response.json();
-                    
-                    if(resData.status === 'success') {
-                        const resAtt = await fetch(`${SCRIPT_URL}?action=getAttendance`);
-                        const dataAtt = await resAtt.json();
-                        if(dataAtt.status === 'success') state.attendance = dataAtt.data;
-                        
-                        finishSubmission();
-                    } else {
-                        alert("Ralat semasa menyimpan. Sila cuba lagi.");
-                        resetBtn();
-                    }
-                } catch (error) {
-                    console.error("Error saving:", error);
-                    alert("Ralat sambungan. Gagal menyimpan.");
-                    resetBtn();
-                }
-            }
-        }
-
-        function finishSubmission() {
-            closeModal();
-            resetBtn();
-            processAnalytics();
-            renderDashboard();
-            renderClasses();
-            showSuccessPopup();
-        }
-
-        function resetBtn() {
-            const btn = document.getElementById('submit-btn');
-            btn.disabled = false;
-            btn.innerHTML = 'HANTAR LAPORAN';
-        }
-
-        function showLoading(show) {
-            const loader = document.getElementById('loading-screen');
-            if (show) {
-                loader.classList.remove('hidden');
-                setTimeout(() => loader.classList.remove('opacity-0'), 10);
-            } else {
-                loader.classList.add('opacity-0');
-                setTimeout(() => loader.classList.add('hidden'), 500);
-            }
-        }
-
-        function showSuccessPopup() {
-            const screen = document.getElementById('success-screen');
-            const logo = document.getElementById('success-logo');
-            
-            logo.classList.remove('animate-zoom-3x');
-            void logo.offsetWidth; 
-            
-            screen.classList.remove('hidden');
-            setTimeout(() => {
-                document.getElementById('success-card').classList.remove('scale-95');
-                document.getElementById('success-card').classList.add('scale-100');
-                logo.classList.add('animate-zoom-3x'); 
-            }, 10);
-        }
-
-        function closeSuccess() {
-            const screen = document.getElementById('success-screen');
-            document.getElementById('success-card').classList.remove('scale-100');
-            document.getElementById('success-card').classList.add('scale-95');
-            screen.classList.add('opacity-0');
-            setTimeout(() => {
-                screen.classList.add('hidden');
-                screen.classList.remove('opacity-0');
-            }, 300);
-        }
-
-    </script>
-</body>
-</html>
+                                    return context.raw
